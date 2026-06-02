@@ -1,5 +1,5 @@
 ---
-name: chinese-conversion-for-files
+name: tool-file-chinese-conversion
 description: "簡體中文 ↔ 繁體中文 檔案轉換工具（基於 OpenCC，PEP 723 自包含腳本）。Trigger: user says 轉繁體, 轉簡體, 簡繁轉換, convert to traditional, convert to simplified, 繁化, 簡化。支援 s2t, s2tw, s2twp, s2hk, t2s 配置。"
 ---
 
