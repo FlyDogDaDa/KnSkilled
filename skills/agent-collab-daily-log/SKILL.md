@@ -1,5 +1,5 @@
 ---
-name: daily-log
+name: agent-collab-daily-log
 description: Record daily development activities, decisions, and progress as time-stamped entries in the project's daily log. Use when completing a task, resolving a bug, making a design decision, or when the user asks to log progress.
 ---
 
