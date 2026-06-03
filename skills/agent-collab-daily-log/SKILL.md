@@ -51,6 +51,36 @@ Each entry is a Markdown file with:
 - **References** at the bottom
 - **Kebab-case** for topic names (e.g., `fix-database-connection`)
 
+### Code Snippets Policy
+
+**Do NOT embed code in daily log entries.** Use the `References` section to link to source files so readers can view the latest version directly.
+
+Bad:
+```markdown
+## How
+```python
+def scan_dataset(root: Path) -> list[Path]:
+    return list(root.rglob("**/*.jpg"))
+```
+```
+
+Good:
+```markdown
+## How
+
+- `src/utility.py`: `scan_dataset(root, pattern)` → `list[Path]` via `rglob()`
+- `src/dataset.py`: `ImageDataset` with `transform` property and `get_batch()` for stacking
+- `main.py`: Loads `DATASET_ROOT` from `.env`, tests dataset
+
+## References
+
+- [src/dataset.py](../../src/dataset.py)
+- [src/utility.py](../../src/utility.py)
+- [main.py](../../main.py)
+```
+
+Reason: source files are the source of truth and always up-to-date; logs become stale quickly if code is embedded.
+
 ## Entry Template
 
 Use the template at `assets/entry-template.md`.
