@@ -57,6 +57,7 @@ Ask each SubAgent to return:
 - Spawn all SubAgents **at the same time** — do not spawn sequentially.
 - Do **NOT** proceed to Step 3 until **all** SubAgents have returned.
 - If any SubAgent fails or returns empty, check the result before continuing.
+- **DO NOT read files yourself.** Use `git diff` for context on modified files and delegate file analysis to SubAgents. Reading files directly bypasses the expert analysis pipeline and wastes tokens.
 
 ### Step 3: Determine commit strategy
 
@@ -75,6 +76,7 @@ git commit -m "<message>"
 
 ## Critical Reminders
 
+- **DO NOT read files yourself.** Always delegate file content analysis to SubAgents. This file's job is orchestration, not reading.
 - **Every file needs a SubAgent.** Missing even one file means incomplete context.
 - **All SubAgents run in parallel**, not sequentially.
 - **Blocking checkpoint**: Step 3 (strategy) must not start until Step 2 (SubAgents) is fully complete.
