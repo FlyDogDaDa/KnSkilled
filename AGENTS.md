@@ -1,15 +1,3 @@
-## 關於 terminal
-
-`cd` 是 **必填參數**，而且必須填寫 **專案根目錄名稱**（不是完整路徑）。
-
-而不是完整路徑 `/home/A/B/project`（這樣會報錯）。
-
-所以正常運作的 terminal 呼叫長這樣：
-
-```
-terminal(command="date", cd="project")
-```
-
 ## Commit message
 
 You are an expert at writing Git commits. Your job is to write a short clear commit message that summarizes the changes.
@@ -41,3 +29,21 @@ Follow good Git style:
 
 When managing dependencies, installing packages, or updating the environment, always use `uv` instead of `pip`. For example, use `uv add <package>` to add new dependencies and `uv run <script>` to execute scripts within the managed environment.
 
+## ⚠️ terminal 呼叫規則
+
+### cd 只能填相對路徑
+```
+❌ cd="/home/..." → 報錯
+❌ cd="{project_name}/{project_name}" → 報錯
+✅ cd="{project_name}" → 正確
+✅ cd="{project_name}/folder" → 正確
+```
+
+### 執行前先做
+1. `list_directory(cd="{project}")` 確認結構
+2. 再用 `cd=` 指向正確路徑
+
+### 報錯時怎麼修
+看到 `was not in any of the project's worktrees`：
+- 你把絕對路徑打進去了？→ 改相對路徑
+- 路徑重複了？→ 減一層

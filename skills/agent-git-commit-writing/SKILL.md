@@ -1,19 +1,26 @@
 ---
 name: git-commit-writing
-description: "Expert git commit message writer. Spawns SubAgents to read and analyze every changed file, then writes precise conventional commit messages. Use when user asks to commit, write commit message, or says 寫 commit."
+description: "Automate git commits: analyze diffs via sub-agents, generate Conventional Commits messages, stage files by intent, and auto-commit (no prompts). Use when user asks to commit, /commit, or 寫 commit."
 ---
 
 # Git Commit Message Writer
 
-You are an expert at writing Git commit messages. Write short, clear messages that summarize changes accurately.
+Create atomic, well-structured Git commits following the Conventional Commits specification.
 
-## Rules
+## Role Division
 
-- **Subject line**: Max 50 characters, lowercase first letter, no ending punctuation, use imperative mood (add, fix, update, remove, refactor, etc.)
-- **Body**: Only include if it provides useful context the subject line cannot. Wrap at 72 characters. Keep it short.
-- **No repetition**: Don't repeat subject line content in the body.
-- **No meta-commentary**: Only return the commit message. No explanations, no diff output, no "Here's your commit message:".
-- **Format**: Separate subject and body with a blank line. No body if not needed.
+| Role | Responsibility |
+|------|----------------|
+| **Main Agent** | Run `git status`, batch files into groups, **spawn sub-agents**, coordinate results, execute commit |
+| **Sub-Agent** | Read file(s), analyze diff, output structured analysis |
+
+## ⚠️ CRITICAL RULE — Main Agent
+
+**You MUST NEVER read or analyze any file or diff yourself.**
+
+When `git status` reveals changed files, **your only job** is to spawn sub-agents and delegate all analysis. Reading files yourself wastes this architecture's design.
+
+---
 
 ## Commit Type Guide
 
@@ -21,63 +28,121 @@ You are an expert at writing Git commit messages. Write short, clear messages th
 |------|-------------|---------|
 | `feat` | New feature or functionality | `feat(auth): add JWT token refresh` |
 | `fix` | Bug fix | `fix(loader): handle null response` |
-| `docs` | Documentation changes | `docs(readme): update setup instructions` |
-| `style` | Formatting, whitespace, semicolons (no code logic change) | `style: fix indentation in trainer` |
+| `docs` | Documentation changes only | `docs(readme): update setup instructions` |
+| `style` | Formatting, whitespace, semicolons (no logic change) | `style: fix indentation in trainer` |
 | `refactor` | Code reorganization, no behavior change | `refactor(trainer): split into modules` |
 | `perf` | Performance improvement | `perf(query): add result caching` |
 | `test` | Add or update tests | `test(api): add integration tests` |
-| `chore` | Build, tooling, dependencies, housekeeping | `chore(deps): bump pydantic` |
+| `build` | Build system or dependency changes | `build(deps): bump pydantic` |
 | `ci` | CI/CD configuration | `ci: add pull_request workflow` |
+| `chore` | Maintenance, misc housekeeping | `chore: update lint config` |
 | `revert` | Revert a previous commit | `revert: revert "feat(search)"` |
 
-## Execution — Do Not Skip Steps
+---
 
-After writing the commit message, **directly execute it** — do not ask for confirmation, do not output the message to the user.
+## Workflow
 
 ### Step 1: Discover changes
 
 ```
-git status --short
+git status --porcelain
 ```
 
-Identify all modified, renamed, and untracked files.
+Identify all modified, renamed, added, and untracked files. If **no changes found**, inform the user and abort.
 
-### Step 2: Spawn SubAgents — BLOCKING PHASE
+### Step 2: Batch files into groups
 
-Spawn **one SubAgent per file** in **parallel** (fire all spawns without waiting). Each SubAgent receives:
+Group files by **intent/theme** (code + config + docs, etc.). Each group becomes **one sub-agent task**.
 
-- For **modified/renamed files**: the `git diff` output
-- For **untracked files**: the file contents
+If only 1 group exists, spawn **1 sub-agent**. If 3 groups, spawn **3 sub-agents in parallel**.
 
-Ask each SubAgent to return:
-1. Traditional Chinese summary of the changes
-2. A concise English commit subject (≤50 chars, no ending punctuation, imperative mood)
+### Step 3: Spawn sub-agents — BLOCKING
 
-**Rules for SubAgents:**
-- Spawn all SubAgents **at the same time** — do not spawn sequentially.
-- Do **NOT** proceed to Step 3 until **all** SubAgents have returned.
-- If any SubAgent fails or returns empty, check the result before continuing.
-- **DO NOT read files yourself.** Use `git diff` for context on modified files and delegate file analysis to SubAgents. Reading files directly bypasses the expert analysis pipeline and wastes tokens.
+Spawn one sub-agent per group. **All spawns in parallel, then block until all return.**
 
-### Step 3: Determine commit strategy
+For each sub-agent, provide a **self-contained task** with the sub-agent prompt defined below.
 
-- **Single commit**: If changes share a common intent, write one commit message.
-- **Split commits**: If `git status` shows clearly distinct categories (e.g., code + config + docs), recommend splitting into multiple commits.
+#### Sub-Agent Prompt Template
 
-### Step 4: Stage and commit
+Copy this exact structure for each sub-agent you spawn:
 
 ```
-git add <files>
-git commit -m "<message>"
+You are a code change analyzer. Your job is to read file(s), analyze what changed, and return a structured result.
+
+## Context
+This is part of a git commit workflow. You are analyzing a group of related changes to determine the commit type and message.
+
+## Task
+1. Run `git diff <filepath1> <filepath2> ...` to read the diff of the provided files
+   - If files are new (untracked), use `cat <filepath>` to read their contents
+2. Analyze the changes to determine:
+   - **type**: One of feat/fix/docs/style/refactor/perf/test/build/ci/chore/revert
+   - **scope**: The affected module/area (e.g., auth, api, utils, or empty)
+   - **description**: A concise summary of what changed (imperative mood, present tense, ≤50 chars, no ending punctuation, capitalize first letter)
+   - **body**: Optional detailed explanation if the change is complex (wrap at 72 chars)
+
+## Output Format — Return ONLY this JSON, nothing else:
+
+```json
+{
+  "type": "feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert",
+  "scope": "optional-scope",
+  "subject": "Brief description of what changed",
+  "body": "Detailed explanation (omit if not useful, use null if empty)"
+}
+```
+
+## Rules
+- Be concise in the subject line (≤50 chars)
+- Use imperative mood: "add" not "added", "fix" not "fixes"
+- Scope is extracted from file paths when obvious (e.g., `src/auth/` → `auth`)
+- If no clear scope, omit it (return null or empty string)
+- **DO NOT** execute git commands other than `git diff` or `cat` on the provided files
+- **DO NOT** run `git add` or `git commit` — you only analyze
+```
+
+### Step 4: Collect and synthesize results
+
+Wait for **all sub-agents to return**. Then:
+
+- If **all agree on the same type**, produce **one commit message**.
+- If **sub-agents report different types**, you have **mixed intent** — split into **multiple commits**.
+
+### Step 5: Stage and commit
+
+```
+git add <files-for-group>
+git commit -m "<type>[scope]: <subject>"
+# or multi-line:
+git commit -m "<type>[scope]: <subject>\n\n<body>"
 ```
 
 - If changes are already staged, skip `git add`.
-- **Do NOT ask for confirmation. Do NOT output the message to the user. Just commit.**
+- **Never ask for confirmation. Just commit.**
 
-## Critical Reminders
+---
 
-- **DO NOT read files yourself.** Always delegate file content analysis to SubAgents. This file's job is orchestration, not reading.
-- **Every file needs a SubAgent.** Missing even one file means incomplete context.
-- **All SubAgents run in parallel**, not sequentially.
-- **Blocking checkpoint**: Step 3 (strategy) must not start until Step 2 (SubAgents) is fully complete.
-- If `git status` reveals no changes, inform the user and abort.
+## Commit Message Rules
+
+- **Subject**: Max 50 chars, capitalize first letter, no ending punctuation, imperative mood
+- **Body**: Only if it provides useful context. Wrap at 72 chars.
+- **No repetition**: Don't repeat subject in body.
+- **Reference issues**: `Closes #123`, `Refs #456` when applicable.
+
+---
+
+## Git Safety Protocol
+
+- **NEVER** update git config
+- **NEVER** run destructive commands (`--force`, `hard reset`) without explicit request
+- **NEVER** skip hooks (`--no-verify`) unless user asks
+- **NEVER** force push to `main`/`master`
+- If commit fails due to hooks, **fix and create a NEW commit** (don't amend)
+- If committing to `main`/`master`, warn first
+- **Never stage secrets** (`.env`, `credentials.json`, private keys, etc.)
+
+---
+
+## Execution
+
+After determining the commit message, **directly execute `git commit`** — no confirmation, no preview to user, no meta-commentary.
