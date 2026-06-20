@@ -31,19 +31,8 @@ When managing dependencies, installing packages, or updating the environment, al
 
 ## ⚠️ terminal 呼叫規則
 
-### cd 只能填相對路徑
-```
-❌ cd="/home/..." → 報錯
-❌ cd="{project_name}/{project_name}" → 報錯
-✅ cd="{project_name}" → 正確
-✅ cd="{project_name}/folder" → 正確
-```
+當你需要執行任何涉及目錄導航、進入子目錄或處理複雜路徑的指令時，必須啟動 `terminal-navigation-guard` 技能。
 
-### 執行前先做
-1. `list_directory(cd="{project}")` 確認結構
-2. 再用 `cd=` 指向正確路徑
-
-### 報錯時怎麼修
-看到 `was not in any of the project's worktrees`：
-- 你把絕對路徑打進去了？→ 改相對路徑
-- 路徑重複了？→ 減一層
+### 核心行為規範：
+- **規範獲取**：必須從 `terminal-navigation-guard` 技能中獲取並嚴格遵循最新的參數規範。
+- **錯誤排查**：若遇到 `was not in any of the project's worktrees` 錯誤，請根據該技能內的 SOP 檢查 `cd` 參數是否包含子目錄、絕對路徑或重複根目錄。
