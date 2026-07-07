@@ -25,6 +25,10 @@ Save entries in the project directory:
 <project>/chat_wtih_my_agent/
 ```
 
+Each entry is a Markdown file (`.md`) with the naming format from [naming convention](references/naming-convention.md).
+
+**Note:** If the `chat_wtih_my_agent/` directory does not exist, it will be automatically created when you write the first entry.
+
 Use the naming convention from [naming convention](references/naming-convention.md).
 
 ## Entry Workflow
