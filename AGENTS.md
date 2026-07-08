@@ -27,3 +27,9 @@ Apply YAGNI: exist? → stdlib? → native? → existing dep? → one line? → 
 Principles: no unrequested abstractions, deletion over addition, mark simplifications with `ponytail:` comments.
 
 Levels: `ponytail lite` / `ponytail full` (default) / `ponytail ultra`. Deactivate with "stop ponytail".
+
+## Failure Handling
+
+First failure: try again.
+Two consecutive failures: gather more information and rethink the decision.
+Three or more failures: don't panic. Re-examine your current thinking and what you've done so far. You have time to think carefully, but remember — thinking and information are never truly complete.
