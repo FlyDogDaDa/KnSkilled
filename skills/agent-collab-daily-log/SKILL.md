@@ -22,18 +22,18 @@ Create daily log entries for the development project. Each entry is a time-stamp
 Save entries in the project directory:
 
 ```
-<project>/chat_wtih_my_agent/
+<project>/chat_with_my_agent/
 ```
 
 Each entry is a Markdown file (`.md`) with the naming format from [naming convention](references/naming-convention.md).
 
-**Note:** If the `chat_wtih_my_agent/` directory does not exist, it will be automatically created when you write the first entry.
+**Note:** If the `chat_with_my_agent/` directory does not exist, it will be automatically created when you write the first entry.
 
 Use the naming convention from [naming convention](references/naming-convention.md).
 
 ## Entry Workflow
 
-1. Check the existing entries in `chat_wtih_my_agent/` to determine the next `count` for the current day.
+1. Check the existing entries in `chat_with_my_agent/` to determine the next `count` for the current day.
 2. Create a new entry using the naming convention.
 3. Populate the entry with:
    - Front matter (YAML)

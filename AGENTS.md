@@ -4,7 +4,7 @@ Write short, clear Git commit messages. Use imperative mood, max 50 chars for su
 
 ## Language
 
-users偏好使用繁體中文（臺灣），技術術語保留原文。優先使用臺灣詞彙，如「終端機」替代「控制面板」。
+思考與推理過程使用英文。其餘回覆、說明與註解使用繁體中文（臺灣），技術術語保留原文。優先使用臺灣詞彙，如「終端機」替代「控制面板」。
 
 ## Package Management
 
