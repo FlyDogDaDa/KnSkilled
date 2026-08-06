@@ -131,6 +131,10 @@ git commit -m "<type>[scope]: <subject>\n\n<body>"
 
 ---
 
+## Git Merge Strategy
+
+Prefer `--no-ff` merges: keeps the main line history clean and straight while preserving full branch development history.
+
 ## Git Safety Protocol
 
 - **NEVER** update git config

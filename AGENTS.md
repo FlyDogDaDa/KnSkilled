@@ -12,7 +12,21 @@ using Python with `uv` for dependency management. Use `uv add` / `uv run` instea
 
 ## Terminal Rules
 
-Terminal（終端機）是 access command-line interface（CLI）的入口。Always use `terminal-navigation-guard` skill for directory navigation. Check for `was not in any of the project's worktrees` errors and validate `cd` parameters per the skill's SOP.
+Terminal（終端機）是 access command-line interface（CLI）的入口。Always load and follow the `terminal-navigation-guard` skill before ANY terminal operation.
+
+### Terminal failure override
+
+Terminal failures follow a different rule than general failures — **do NOT blindly retry**.
+
+1. First terminal failure: STOP. Load `terminal-navigation-guard` IMMEDIATELY and re-execute with corrected parameters.
+2. Second terminal failure: STOP again. Verify the skill was applied correctly using the reference table.
+3. Third+ failures: You may be facing a different problem (file missing, permission denied). Investigate before retrying.
+
+**Key rule: Never retry a terminal command without loading `terminal-navigation-guard` first. Blind retries waste tokens and create infinite failure loops.**
+
+### Sub-agent coordination
+
+When spawning a sub-agent that may call the terminal, always include: "Load and follow `terminal-navigation-guard` before making terminal calls."
 
 ## Filesystem Tools
 
@@ -30,6 +44,12 @@ Levels: `ponytail lite` / `ponytail full` (default) / `ponytail ultra`. Deactiva
 
 ## Failure Handling
 
+### General rule
+
 First failure: try again.
 Two consecutive failures: gather more information and rethink the decision.
 Three or more failures: don't panic. Re-examine your current thinking and what you've done so far. You have time to think carefully, but remember — thinking and information are never truly complete.
+
+### Exception: terminal failures
+
+Terminal tool failures are handled by the `Terminal Rules` section above. Do NOT apply the general rule to terminal operations — blind retries create infinite loops.

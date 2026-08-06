@@ -1,88 +1,102 @@
 ---
 name: terminal-navigation-guard
 description: >-
-  Act as a terminal navigation guardian. Prevents costly tool call failures caused by invalid cd parameters
-  before they happen. Every terminal error wastes time and breaks flow.
+  Mandatory pre-flight check and error recovery procedure for ALL terminal operations.
+  This skill MUST be loaded before every `terminal` tool call. This is not optional.
   
-  Your job: Ensure the cd parameter ONLY contains the project root directory name.
-  No subdirectories, no absolute paths, no redundancy.
+  When to load: (a) About to call the `terminal` tool — load BEFORE executing;
+  (b) Terminal tool call failed — load IMMEDIATELY before retrying;
+  (c) Spawning a sub-agent that may call `terminal` — instruct it to load this skill first;
+  (d) You just saw a terminal failure or `was not in any of the project's worktrees` error — this is the fix.
   
-  Use whenever: (1) Spawning sub-agents that may use terminal, (2) Planning any terminal command execution,
-  (3) Writing instructions that involve directory navigation.
+  Terminal failures with invalid `cd` parameters fail silently. Blind retries waste tokens and create infinite failure loops. Loading this skill is the ONLY way to break the loop.
   
-  Proactive rule: Tell sub-agents to 'Load and follow terminal-navigation-guard before making terminal calls.'
-  This prevents failures in delegated work.
+  Proactive rule: Always tell sub-agents: "Load and follow `terminal-navigation-guard` before making terminal calls."
 ---
 
 # Terminal Navigation Guard
 
-> "A single terminal error can undo hours of productive work. Prevention is cheaper than recovery."
+> 「`cd` 參數錯誤會**靜默失敗**。不載入此技能就重試 = 無限迴圈。」
 
-This skill is your first line of defense against `terminal` tool call failures. Invalid `cd` parameters cause immediate, silent failures that waste time and break agent flow.
+## 核心機制
 
-**The problem:** The terminal tool requires a specific format for directory navigation. Getting it wrong doesn't warn you — it just fails.
+這是一個 **兩階段防護**：
 
-**The solution:** Proactively validate every `cd` parameter before any terminal command executes.
+| 階段 | 時機 | 動作 |
+|------|------|------|
+| **階段 1：執行前** | 準備呼叫 `terminal` | 檢查 `cd` + `command` 格式（見下方檢查清單） |
+| **階段 2：失敗後** | `terminal` 呼叫失敗 | 載入本技能 → 修正參數 → 重試 |
 
-## Core Rules — Non-Negotiable
+**不管哪個階段，都要先載入此技能。**
 
-Violation consequences: **Immediate tool failure**, wasted tokens, broken agent workflow.
+## 絕對規則（`cd` 參數）
 
-| Rule | Valid Example | Invalid Example | Why It Fails |
-|------|---------------|-----------------|---------------|
-| **Root Only** | `cd="KnSkilled"` | `cd="KnSkilled/skills"` | Subdirectories not allowed |
-| **No Absolute Paths** | `cd="KnSkilled"` | `cd="C:\\KnSkilled"` | Absolute paths rejected |
-| **No Redundancy** | `cd="KnSkilled"` | `cd="KnSkilled/KnSkilled"` | Duplicate root detected |
+| 規則 | ✅ 正確 | ❌ 錯誤 | 原因 |
+|------|---------|---------|------|
+| **只能放根目錄** | `cd="KnSkilled"` | `cd="KnSkilled/skills"` | 系統不接受子目錄 |
+| **不能放絕對路徑** | `cd="KnSkilled"` | `cd="C:\KnSkilled"` | 被系統拒絕 |
+| **不能冗餘** | `cd="KnSkilled"` | `cd="KnSkilled/KnSkilled"` | 根目錄重複 |
 
-**Memory hook:** `cd` = **C**urrent **D**irectory (root level only). Use `command` for everything else.
+**口訣：** `cd` 只放**專案根目錄名稱**。其餘一切放進 `command`。
 
-## SOP: Navigating to Sub-directories
-
-When a command needs to operate in a sub-directory, split the responsibility:
-
-1. **`cd`** = Project root only (non-negotiable)
-2. **`command`** = Full path to target (includes subdirectories)
-
-### Quick Reference Table
-
-| Target File | ✅ Correct | ❌ Wrong |
-|-------------|------------|----------|
-| `KnSkilled/skills/ponytail/SKILL.md` | `cd="KnSkilled" command="cat skills/ponytail/SKILL.md"` | `cd="KnSkilled/skills/ponytail" command="cat SKILL.md"` |
-| `KnSkilled/chat_wlih_my_agent/2024-01-15.md` | `cd="KnSkilled" command="ls chat_wlih_my_agent/2024-01-15.md"` | `cd="KnSkilled/chat_wlih_my_agent" command="ls 2024-01-15.md"` |
-
-### Pattern to Remember
+## 子目錄操作模式
 
 ```
-cd="<root_project_name>" command="<subdir_path>/<filename>"
+cd="<根目錄>" command="<子路徑>/<指令>"
 ```
 
-**Mnemonic:** "Root for cd, full path for command."
+| 目標 | ✅ 正確 | ❌ 錯誤 |
+|------|---------|---------|
+| 讀 `skills/ponytail/SKILL.md` | `cd="KnSkilled" command="cat skills/ponytail/SKILL.md"` | `cd="KnSkilled/skills/ponytail" command="cat SKILL.md"` |
+| 列 `chat/` 目錄 | `cd="KnSkilled" command="ls chat/"` | `cd="KnSkilled/chat" command="ls ."` |
+| 執行 `uv run script.py` | `cd="KnSkilled" command="uv run script.py"` | `cd="KnSkilled/scripts" command="uv run script.py"` |
 
-## Sub-agent Coordination
+## 執行前檢查清單
 
-When spawning a sub-agent that may need to use the `terminal` tool, **always include this instruction**:
+在呼叫 `terminal` 之前，**每一項**都必須是 YES：
 
-> "Load and follow the `terminal-navigation-guard` skill before making any terminal calls."
-
-This prevents failures in delegated work and ensures consistent behavior across all agent invocations.
-
-### When to Apply
-
-- [ ] Spawning sub-agents with terminal commands
-- [ ] Planning multi-step workflows involving directories
-- [ ] Writing instructions for other agents about file operations
-- [ ] Debugging terminal tool failures
-
-## Error Recovery
-
-If a terminal call fails with an unexpected error:
-
-1. **Check `cd` parameter**: Is it only the project root?
-2. **Review `command` path**: Does it include subdirectory navigation?
-3. **Re-run with corrected parameters**: Use the patterns above.
-
-**Common mistake pattern:**
 ```
-❌ cd="project/root/subdir" command="ls file.txt"
-✅ cd="project" command="ls root/subdir/file.txt"
+[ ] cd 參數 = 只有根目錄名稱（不含子目錄）
+[ ] command 參數 = 包含完整子路徑（如有）
+[ ] cd 參數 = 沒有絕對路徑
+[ ] cd 參數 = 沒有路徑冗餘
 ```
+
+有任何 NO → 修正後再呼叫。
+
+## 失敗處理（終止無限迴圈）
+
+```
+❌ 不要做的事：
+   • 盲試不同的 command
+   • 不載入本技能就直接重試
+   • 假設是網路或權限問題
+
+✅ 要做的事：
+   1. 看到 terminal 失敗 → 停止
+   2. 載入 terminal-navigation-guard
+   3. 對照上方規則檢查 cd/command
+   4. 修正後重試
+```
+
+**記住：不載入本技能就重試 = 延長失敗迴圈。**
+
+## 子-agent 協調
+
+派發 sub-agent 且其「可能」使用 terminal 時，任務說明中**必須包含**：
+
+> "Load and follow `terminal-navigation-guard` before making terminal calls."
+
+適用時機：
+- [ ] 派發 sub-agent
+- [ ] 規劃多步驟含目錄操作的工作流
+- [ ] 為其他 agent 編寫包含路徑的操作說明
+- [ ] terminal 失敗後的重試前
+
+## 常見錯誤碼對照
+
+| 錯誤訊息片段 | 根因 | 解法 |
+|-------------|------|------|
+| `was not in any of the project's worktrees` | `cd` 包含子目錄 | 改為根目錄名稱 |
+| 無輸出/靜默失敗 | `cd` 格式錯誤 | 檢查是否為絕對路徑或冗餘 |
+| 重複失敗 | 未載入本技能就直接重試 | 載入技能 → 修正參數 |
