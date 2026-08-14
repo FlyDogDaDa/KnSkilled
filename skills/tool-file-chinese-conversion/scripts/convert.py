@@ -39,7 +39,9 @@ DEFAULT_CONFIG = "s2twp"
 # ──────────────────────────────────────────────
 # 核心轉換邏輯
 # ──────────────────────────────────────────────
-def convert_file(input_path: Path, config_name: str = DEFAULT_CONFIG) -> Path:
+def convert_file(
+    input_path: Path, config_name: str = DEFAULT_CONFIG, dry_run: bool = True
+) -> Path:
     """
     將 input_path 的簡體中文轉換為繁體中文，以 temp file 策略寫回。
 
@@ -80,7 +82,12 @@ def convert_file(input_path: Path, config_name: str = DEFAULT_CONFIG) -> Path:
         print(f"⚠️  {input_path} 無簡體字，不需轉換")
         return input_path
 
-    # 5. 寫入暫存檔案（而非直接覆寫）
+    # 5. Dry run: 只輸出結果，不寫入
+    if dry_run:
+        print(f"✅ [dry-run] 將轉換：{input_path}")
+        return input_path
+
+    # 6. 寫入暫存檔案（而非直接覆寫）
     temp_fd, temp_path = tempfile.mkstemp(
         prefix=".s2t_convert_",
         suffix=".tmp",
@@ -90,7 +97,7 @@ def convert_file(input_path: Path, config_name: str = DEFAULT_CONFIG) -> Path:
         with os.fdopen(temp_fd, "w", encoding="utf-8") as temp_f:
             temp_f.write(converted_content)
 
-        # 6. 以原子方式替換原始檔
+        # 7. 以原子方式替換原始檔
         shutil.move(temp_path, str(input_path))
         print(f"✅ 已轉換：{input_path}  （配置：{config_name} / {config_key}）")
     except Exception:
@@ -103,11 +110,13 @@ def convert_file(input_path: Path, config_name: str = DEFAULT_CONFIG) -> Path:
     return input_path
 
 
-def convert_files_batch(paths: list[Path], config_name: str = DEFAULT_CONFIG):
+def convert_files_batch(
+    paths: list[Path], config_name: str = DEFAULT_CONFIG, dry_run: bool = True
+):
     """批次轉換多個檔案"""
     for p in paths:
         try:
-            convert_file(p, config_name)
+            convert_file(p, config_name, dry_run)
         except (FileNotFoundError, ValueError) as e:
             print(f"❌ 錯誤：{e}")
 
@@ -128,10 +137,10 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "使用範例：\n"
-            "  uv run scripts/convert.py file.txt                    # 轉換單檔\n"
-            "  uv run scripts/convert.py dir/                        # 批次轉換目錄\n"
-            "  uv run scripts/convert.py file.txt -c s2t             # 指定配置\n"
-            "  uv run scripts/convert.py --project-root /proj path   # 相對路徑相對於 proj\n"
+            "  uv run scripts/convert.py file.txt                    # dry-run 預覽\n"
+            "  uv run scripts/convert.py file.txt --apply            # 實際轉換\n"
+            "  uv run scripts/convert.py dir/ -c s2t                # 批次轉換（dry-run）\n"
+            "  uv run scripts/convert.py --project-root /proj path   # 指定根目錄\n"
         ),
     )
     parser.add_argument(
@@ -152,6 +161,11 @@ def main():
         type=Path,
         default=None,
         help="專案根目錄：相對路徑將相對於此目錄解析。若未指定，則相對於當前工作目錄。",
+    )
+    parser.add_argument(
+        "--apply",
+        action="store_true",
+        help="實際寫入檔案（預設為 dry-run 模式，只顯示預覽）",
     )
 
     args = parser.parse_args()
@@ -176,9 +190,7 @@ def main():
                 ".ini",
             ):
                 target_paths.extend(p.rglob(f"*{ext}"))
-            print(
-                f"📂 掃描目錄：{p} → 找到 {len(target_paths)} 個檔案"
-            )
+            print(f"📂 掃描目錄：{p} → 找到 {len(target_paths)} 個檔案")
         elif p.is_file():
             target_paths.append(p)
         else:
@@ -189,7 +201,8 @@ def main():
         return
 
     print(f"📁 專案根目錄：{project_root.resolve()}")
-    convert_files_batch(target_paths, args.config)
+    dry_run = not args.apply
+    convert_files_batch(target_paths, args.config, dry_run)
 
 
 if __name__ == "__main__":
