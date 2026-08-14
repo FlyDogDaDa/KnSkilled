@@ -28,14 +28,6 @@ Terminal is the entry point for command-line access. Always load and follow the 
 3. Check `cd` format
 4. Retry with corrected parameters
 
-## Filesystem Tools
-
-`create_directory` returns `Created directory <name>` on success. Treat this message as confirmation that the directory was created or already existed.
-
-If unsure, verify with `list_directory` or `ls`.
-
 ## Ponytail
 
 Write minimal code. Load and follow the `ponytail` skill.
-
-## Ponytail

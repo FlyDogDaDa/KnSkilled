@@ -1,26 +1,17 @@
 ---
 name: git-commit-writing
-description: "Automate git commits: analyze diffs via sub-agents, generate Conventional Commits messages, stage files by intent, and auto-commit (no prompts). Use when user asks to commit, /commit, or 寫 commit."
+description: "Automate git commits: analyze diffs directly, generate Conventional Commits messages, stage files by intent, and auto-commit (no prompts). Use when user asks to commit, /commit, 寫 commit."
 ---
 
 # Git Commit Message Writer
 
 Create atomic, well-structured Git commits following the Conventional Commits specification.
 
-## Role Division
+## Dependencies
 
-| Role | Responsibility |
-|------|----------------|
-| **Main Agent** | Run `git status`, batch files into groups, **spawn sub-agents**, coordinate results, execute commit |
-| **Sub-Agent** | Read file(s), analyze diff, output structured analysis |
+- **terminal-navigation-guard** — MUST be loaded before ANY `git` terminal operation.
 
-## ⚠️ CRITICAL RULE — Main Agent
-
-**You MUST NEVER read or analyze any file or diff yourself.**
-
-When `git status` reveals changed files, **your only job** is to spawn sub-agents and delegate all analysis. Reading files yourself wastes this architecture's design.
-
----
+> Before running any `git` command, load `terminal-navigation-guard` first.
 
 ## Commit Type Guide
 
@@ -44,71 +35,27 @@ When `git status` reveals changed files, **your only job** is to spawn sub-agent
 
 ### Step 1: Discover changes
 
-```
-git status --porcelain
-```
+Run `git status --porcelain` (after loading `terminal-navigation-guard`).
 
 Identify all modified, renamed, added, and untracked files. If **no changes found**, inform the user and abort.
 
 ### Step 2: Batch files into groups
 
-Group files by **intent/theme** (code + config + docs, etc.). Each group becomes **one sub-agent task**.
+Group files by **intent/theme** (code + config + docs, etc.). Each group becomes **one commit**.
 
-If only 1 group exists, spawn **1 sub-agent**. If 3 groups, spawn **3 sub-agents in parallel**.
+### Step 3: Analyze diffs directly
 
-### Step 3: Spawn sub-agents — BLOCKING
+For each group, read the diff using `git diff <filepath1> <filepath2> ...` (after loading `terminal-navigation-guard`).
 
-Spawn one sub-agent per group. **All spawns in parallel, then block until all return.**
+For new (untracked) files, use `cat <filepath>` to read their contents.
 
-For each sub-agent, provide a **self-contained task** with the sub-agent prompt defined below.
+Analyze the changes to determine:
+- **type**: One of feat/fix/docs/style/refactor/perf/test/build/ci/chore/revert
+- **scope**: The affected module/area (e.g., auth, api, utils, or empty)
+- **subject**: A concise summary (imperative mood, ≤50 chars, no ending punctuation, capitalize first letter)
+- **body**: Optional detailed explanation if the change is complex (wrap at 72 chars)
 
-#### Sub-Agent Prompt Template
-
-Copy this exact structure for each sub-agent you spawn:
-
-```
-You are a code change analyzer. Your job is to read file(s), analyze what changed, and return a structured result.
-
-## Context
-This is part of a git commit workflow. You are analyzing a group of related changes to determine the commit type and message.
-
-## Task
-1. Run `git diff <filepath1> <filepath2> ...` to read the diff of the provided files
-   - If files are new (untracked), use `cat <filepath>` to read their contents
-2. Analyze the changes to determine:
-   - **type**: One of feat/fix/docs/style/refactor/perf/test/build/ci/chore/revert
-   - **scope**: The affected module/area (e.g., auth, api, utils, or empty)
-   - **description**: A concise summary of what changed (imperative mood, present tense, ≤50 chars, no ending punctuation, capitalize first letter)
-   - **body**: Optional detailed explanation if the change is complex (wrap at 72 chars)
-
-## Output Format — Return ONLY this JSON, nothing else:
-
-```json
-{
-  "type": "feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert",
-  "scope": "optional-scope",
-  "subject": "Brief description of what changed",
-  "body": "Detailed explanation (omit if not useful, use null if empty)"
-}
-```
-
-## Rules
-- Be concise in the subject line (≤50 chars)
-- Use imperative mood: "add" not "added", "fix" not "fixes"
-- Scope is extracted from file paths when obvious (e.g., `src/auth/` → `auth`)
-- If no clear scope, omit it (return null or empty string)
-- **DO NOT** execute git commands other than `git diff` or `cat` on the provided files
-- **DO NOT** run `git add` or `git commit` — you only analyze
-```
-
-### Step 4: Collect and synthesize results
-
-Wait for **all sub-agents to return**. Then:
-
-- If **all agree on the same type**, produce **one commit message**.
-- If **sub-agents report different types**, you have **mixed intent** — split into **multiple commits**.
-
-### Step 5: Stage and commit
+### Step 4: Stage and commit
 
 ```
 git add <files-for-group>
