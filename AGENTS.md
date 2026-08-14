@@ -20,7 +20,7 @@ using Python with `uv` for dependency management. Use `uv add` / `uv run` instea
 
 Terminal is the entry point for command-line access. Always load and follow the `terminal-navigation-guard` skill before making terminal calls.
 
-`cd` parameter errors fail silently. Blind retries create infinite loops.
+> **`cd` parameter errors fail silently.** Retrying without loading `terminal-navigation-guard` = infinite loop.
 
 **On any terminal failure:**
 1. Stop
