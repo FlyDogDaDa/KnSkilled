@@ -23,6 +23,13 @@ Terminal is the entry point for command-line access. Always load and follow the 
 > **`cd` parameter errors fail silently.** Retrying without loading `terminal-navigation-guard` = infinite loop.
 
 **On any terminal failure:**
+
+❌ Do NOT:
+- Try different commands blindly
+- Retry without loading `terminal-navigation-guard`
+- Assume network or permission issues
+
+✅ Do:
 1. Stop
 2. Load `terminal-navigation-guard`
 3. Check `cd` format
