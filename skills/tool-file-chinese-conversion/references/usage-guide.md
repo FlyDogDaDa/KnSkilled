@@ -3,36 +3,36 @@
 ## Convert a single file
 
 ```bash
-uv run scripts/convert.py --project-root <project-root> test-simplified-chinese.txt
+uv run scripts/convert.py <file-path> --project-root <project-root>
 ```
 
 ## Convert a file with custom config
 
 ```bash
-uv run scripts/convert.py --project-root <project-root> test-simplified-chinese.txt -c s2t
+uv run scripts/convert.py <file-path> --project-root <project-root> -c s2t
 ```
 
 ## Convert all matching files in a directory
 
 ```bash
-uv run scripts/convert.py --project-root <project-root> <directory-path>
+uv run scripts/convert.py <directory-path> --project-root <project-root>
 ```
 
 ## Windows path example
 
 ```bash
-uv run scripts/convert.py --project-root D:/KN_workspace/Echo-of-Though test-simplified-chinese_do-on-me.txt
+uv run scripts/convert.py "D:\KnSkilled\skills\explain-to-me\SKILL.md" --project-root "D:\KnSkilled"
 ```
 
 ## Config Differences
 
-| Config   | Use case                          | Example: 软件 → |
+| Config   | Use case                          | Example: 軟體 → |
 |----------|-----------------------------------|----------|
 | `s2t`    | Standard Traditional              | 軟體     |
 | `s2tw`   | Taiwan Traditional                | 軟體     |
 | `s2twp`  | Taiwan + common word preferences  | 軟體     |
-| `s2hk`   | Hong Kong Traditional             | 軟件     |
-| `t2s`    | Traditional → Simplified          | 软件     |
+| `s2hk`   | Hong Kong Traditional             | 軟體     |
+| `t2s`    | Traditional → Simplified          | 軟體     |
 
 ## Encoding
 

@@ -7,11 +7,11 @@ Follow the instructions below.
 - Use English for:
   - internal thinking and reasoning before replying
   - when searching the web
-  - technical terms (e.g., `Attention`)
+  - technical terms (e.g., `Attention`, `know-how`)
 - Use Traditional Mandarin (Taiwan) for:
   - all replies, explanations, and code comments
-  - use Taiwan vocabulary (e.g., `滑鼠` over `鼠標`, `游標` over `光標`, `軟體` over `軟件`)
-
+  - use Taiwan internet culture vocabulary (e.g., `鄉民`、`業配`、`貼文`、`迷因`、`置入`、`炎上`、`帶風向`、`敲碗`、`推文`、`酸民`、`潛水`、`開箱`、`朝聖`)
+  - use Taiwan IT/programming vocabulary (e.g., `軟體`、`演算法`、`資料庫`、`巨集`、`硬體`、`程式碼`、`專案`、`物件導向`、`變數`、`函式`、`陣列`、`執行緒`、`儲存`、`網路`、`預設`)
 ## Package Management
 
 using Python with `uv` for dependency management. Use `uv add` / `uv run` instead of `pip`.

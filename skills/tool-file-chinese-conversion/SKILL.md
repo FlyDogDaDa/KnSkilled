@@ -30,7 +30,7 @@ uv run scripts/convert.py <path> -c <config>
 指定專案根目錄（用於相對路徑）：
 
 ```
-uv run scripts/convert.py --project-root <project-root> <path> --apply
+uv run scripts/convert.py <path> --project-root <project-root> --apply
 ```
 
 > **注意**：預設 dry-run 模式，只顯示預覽結果，不實際寫入檔案。加入 `--apply` 才真正轉換。
@@ -39,9 +39,9 @@ uv run scripts/convert.py --project-root <project-root> <path> --apply
 
 | Config | 方向 | 說明 |
 |--------|------|------|
-| `s2twp` | 簡體 → 繁體 (台灣) | **預設**，含台灣常用詞彙 |
+| `s2twp` | 簡體 → 繁體 (臺灣) | **預設**，含臺灣常用詞彙 |
 | `s2t` | 簡體 → 繁體 (標準) | 通用繁體轉換 |
-| `s2tw` | 簡體 → 繁體 (台灣) | 不含常用詞 |
+| `s2tw` | 簡體 → 繁體 (臺灣) | 不含常用詞 |
 | `s2hk` | 簡體 → 繁體 (香港) | 香港習慣用詞 |
 | `t2s` | 繁體 → 簡體 | 繁體轉簡體 |
 

@@ -5,10 +5,10 @@
 # ]
 # ///
 """
-簡體中文 → 繁體中文 轉換工具 (PEP 723 自包含腳本)
+簡體中文 → 繁體中文 轉換工具 (PEP 723 自包含指令碼)
 
 使用 OpenCC 進行詞彙級別的中間轉換，支援地區習慣用詞。
-文件讀寫策略：
+檔案讀寫策略：
   - 讀取時先寫入暫存檔，避免檔案被佔用時讀取失敗
   - 轉換完成後寫入暫存檔
   - 最後以 shutil.move 原子替換原始檔案，解決「檔案已開啟」問題
@@ -23,12 +23,12 @@ from pathlib import Path
 import opencc
 
 # ──────────────────────────────────────────────
-# 可選配置文件
+# 可選配置檔案
 # ──────────────────────────────────────────────
 CONFIGS = {
     "s2t": "s2t.json",  # 簡體 → OpenCC 標準繁體
-    "s2tw": "s2tw.json",  # 簡體 → 台灣正體
-    "s2twp": "s2twp.json",  # 簡體 → 台灣正體（含台灣常用詞彙）← 預設
+    "s2tw": "s2tw.json",  # 簡體 → 臺灣正體
+    "s2twp": "s2twp.json",  # 簡體 → 臺灣正體（含臺灣常用詞彙）← 預設
     "t2s": "t2s.json",  # 繁體 → 簡體
     "s2hk": "s2hk.json",  # 簡體 → 香港繁體
 }
@@ -170,7 +170,7 @@ def main():
 
     args = parser.parse_args()
 
-    # 解析專案根目錄：优先使用 --project-root，否則使用當前工作目錄
+    # 解析專案根目錄：優先使用 --project-root，否則使用當前工作目錄
     project_root = args.project_root if args.project_root else Path.cwd()
 
     target_paths = []
