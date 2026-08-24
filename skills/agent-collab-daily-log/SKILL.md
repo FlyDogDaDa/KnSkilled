@@ -3,92 +3,51 @@ name: daily-log-writing
 description: Record daily development activities, decisions, and progress as time-stamped entries in the project's daily log. Use when completing a task, resolving a bug, making a design decision, or when the user asks to log progress.
 ---
 
-# Daily Log Skill
+# Daily Log Skill（SOP）
 
-## Purpose
+一次做一步：依 Step 1 → 4 順序執行，不要跳步。
 
-Create daily log entries for the development project. Each entry is a time-stamped record of work completed, decisions made, and things to follow up on.
+所有寫入都直接寫到目標路徑；上層資料夾若不存在，先建立再寫入。
 
-## When to Activate
+開始前，先看 `<project>/chat_with_my_agent/` 下有沒有今天的日誌資料夾 `{yyyy}_{mm}_{dd}/`，沒有就用今天日期建；同時看該資料夾內既有條目，決定下一個 `count`（`00`、`01`、…）。
 
-- User asks to record progress or log work
-- A significant task is completed
-- A design decision is made
-- A bug is fixed (with notable details)
-- Before ending a session with pending work
+## Step 1：有沒有程式要歸檔？
 
-## Where to Save Entries
+判斷這次產出的工作中有沒有程式碼或腳本檔案需要歸檔（實驗程式、ad-hoc 腳本、可重現樣本）。
 
-Save entries in the project directory:
+- **有** → 讀 [實驗與腳本歸檔引導](references/scripts-archiving.md)，照它歸檔到
+  `<project>/chat_with_my_agent/{yyyy}_{mm}_{dd}/scripts/{folder_name}/`
+- **沒有** → 下一步
+
+## Step 2：有沒有參考文件要歸檔？
+
+判斷這次工作中有沒有參考材料或產出的檔案需要歸檔（外部資料、數據、報告產物）。
+
+- **有** → 讀 [參考文件歸檔指引](references/assets-archiving.md)，照它歸檔到
+  `<project>/chat_with_my_agent/{yyyy}_{mm}_{dd}/assets/{folder_name}/`
+- **沒有** → 下一步
+
+## Step 3：討論過程詳細匯出（必做）
+
+這一步**必做**。將所有從頭到尾的過程 dump 到 details 檔：
 
 ```
-<project>/chat_with_my_agent/
+<project>/chat_with_my_agent/{yyyy}_{mm}_{dd}/references/{count}_{agent|human}_{topic}.md
 ```
 
-Each entry is a Markdown file (`.md`) with the naming format from [naming convention](references/naming-convention.md).
+- **所有細節**都寫下來：討論、推理、考慮過的選項、選它的理由
+- 可拆分成多份檔案，命名見 [naming convention](references/naming-convention.md)
+- 討論過程歸檔後，Step 4 寫日誌與之後的回看都會更好做
 
-**Note:** If the `chat_with_my_agent/` directory does not exist, it will be automatically created when you write the first entry.
+## Step 4：執行日誌撰寫
 
-Use the naming convention from [naming convention](references/naming-convention.md).
+主日誌寫入：
 
-## Entry Workflow
-
-1. Check the existing entries in `chat_with_my_agent/` to determine the next `count` for the current day.
-2. Create a new entry using the naming convention.
-3. Populate the entry with:
-   - Front matter (YAML)
-   - Title (`#`)
-   - Timestamp using your knowledge of the current date
-   - **What was done** — specific and factual
-   - **Why** — context or rationale for decisions
-   - **How** — technical details (files changed, commands run, code patterns)
-   - **Follow-up** — pending items or next steps
-   - References — links or related entries
-4. Use the template from [entry template](assets/entry-template.md).
-
-## Entry Format
-
-Each entry is a Markdown file with:
-
-- **YAML front matter** (between `---`)
-- **Sections** using `##` headings
-- **References** at the bottom
-- **Kebab-case** for topic names (e.g., `fix-database-connection`)
-
-### Code Snippets Policy
-
-**Do NOT embed code in daily log entries.** Use the `References` section to link to source files so readers can view the latest version directly.
-
-Bad:
-```markdown
-## How
-```python
-def scan_dataset(root: Path) -> list[Path]:
-    return list(root.rglob("**/*.jpg"))
 ```
+<project>/chat_with_my_agent/{yyyy}_{mm}_{dd}/{count}_{agent|human}_{topic}.md
 ```
 
-Good:
-```markdown
-## How
-
-- `src/utility.py`: `scan_dataset(root, pattern)` → `list[Path]` via `rglob()`
-- `src/dataset.py`: `ImageDataset` with `transform` property and `get_batch()` for stacking
-- `main.py`: Loads `DATASET_ROOT` from `.env`, tests dataset
-
-## References
-
-- [src/dataset.py](../../src/dataset.py)
-- [src/utility.py](../../src/utility.py)
-- [main.py](../../main.py)
-```
-
-Reason: source files are the source of truth and always up-to-date; logs become stale quickly if code is embedded.
-
-## Entry Template
-
-Use the template at `assets/entry-template.md`.
-
-## Naming Convention
-
-For the full file naming format, see [naming-convention.md](references/naming-convention.md).
+- 用 [entry template](assets/entry-template.md)，命名見 [naming convention](references/naming-convention.md)
+- 主日誌與討論 details 檔共用同一個 `count` 與 `topic`
+- `References` 連結到 `references/` 的 details 檔與 `scripts/`、`assets/` 的歸檔
+- **不要在日誌內嵌程式碼或大段材料**，一律連結到歸檔檔案

@@ -1,40 +1,53 @@
-# File Naming Convention
+# 檔案命名規範
 
-## Format
+## 目錄結構
 
-All log entries must follow this naming format:
-
-```
-{count}_{yyyy}_{mm}_{dd}_{Agent/Human}_{topic}.md
-```
-
-### Field Definitions
-
-| Field | Description | Example |
-|-------|-------------|---------|
-| `count` | Sequence number for the day, starting from `00` | `00`, `01`, `02` |
-| `yyyy` | Four-digit year | `2026` |
-| `mm` | Two-digit month | `06` |
-| `dd` | Two-digit day | `02` |
-| `Agent/Human` | Who initiated: `agent` or `human` | `agent`, `human` |
-| `topic` | Topic name in kebab-case (hyphens, not underscores) | `fix-database-connection`, `add-git-push` |
-
-### Naming Rules
-
-- `topic` must use **kebab-case** (hyphens as separators), NOT underscores
-- `count` increments for each entry within the same day, starting from `00` and comes **before** the date
-- `Agent` or `Human` indicates whether the entry was created by the user or the agent
-- The entire filename must be lowercase
-
-### Examples
+一天內的所有內容都放在日誌資料夾下：
 
 ```
-00_2026_06_02_human_daily-log-setup.md
-01_2026_06_02_agent_fix-git-configuration.md
-02_2026_06_02_human_uv-project-initialization.md
-00_2026_06_03_agent_daily-progress-report.md
+<project>/chat_with_my_agent/{yyyy}_{mm}_{dd}/
+├── {count}_{agent|human}_{topic}.md      # 主日誌
+├── references/
+│   └── {count}_{agent|human}_{topic}.md  # 討論細節（可拆多份）
+├── scripts/
+│   └── {folder_name}/                    # 程式／腳本歸檔
+└── assets/
+    └── {folder_name}/                    # 參考文件歸檔
 ```
 
-## Examples
+日誌資料夾名就是 `{yyyy}_{mm}_{dd}`，不存在就先建。
+所有寫入都直接寫到目標路徑；上層資料夾若不存在，先建立再寫入。
 
-For a ready-to-use entry template with front matter, see [entry template](../assets/entry-template.md).
+## 欄位定義
+
+| 欄位 | 說明 | 範例 |
+|------|------|------|
+| `count` | 當日流水號，從 `00` 起 | `00`、`01`、`02` |
+| `agent\|human` | 誰發起：`agent` 或 `human` | `agent`、`human` |
+| `topic` | kebab-case（連字符分隔），全小寫 | `fix-database-connection` |
+| `folder_name` | kebab-case，全小寫，依歸檔主題命名 | `dataset-scan`、`web-research` |
+
+## 命名規則
+
+- 檔名不再含日期（日期在日誌資料夾名中）
+- `count` 當日每筆一條目遞增，從 `00` 起；主日誌與其討論 details 檔**共用同一個 `count`**
+- 主日誌與 `references/` 內的 details 檔檔名相同，靠所在資料夾區分
+- details 檔拆多份時：第一份 `{count}_{agent|human}_{topic}.md`，之後依序加 `-p2`、`-p3`…
+  例如 `01_agent_design-review.md`、`01_agent_design-review-p2.md`
+- 整個檔名全小寫；topic 用連字符，不用底線
+
+## 範例
+
+```
+chat_with_my_agent/
+└── 2026_08_24/
+    ├── 00_agent_fix-database-connection.md
+    ├── 01_human_design-review.md
+    ├── references/
+    │   ├── 01_human_design-review.md
+    │   └── 01_human_design-review-p2.md
+    ├── scripts/
+    │   └── repro-scan/
+    └── assets/
+        └── spec-draft/
+```
