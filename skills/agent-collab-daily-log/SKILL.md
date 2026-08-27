@@ -7,7 +7,7 @@ description: Record daily development activities, decisions, and progress as tim
 
 一次做一步：依 Step 1 → 4 順序執行，不要跳步。
 
-所有寫入都直接寫到目標路徑；上層資料夾若不存在，先建立再寫入。
+寫入檔案前，先建立完整的上層資料夾再寫入——寫入本身不會自動建立上層資料夾。
 
 開始前，先看 `<project>/chat_with_my_agent/` 下有沒有今天的日誌資料夾 `{yyyy}_{mm}_{dd}/`，沒有就用今天日期建；同時看該資料夾內既有條目，決定下一個 `count`（`00`、`01`、…）。
 
