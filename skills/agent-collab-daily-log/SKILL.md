@@ -5,7 +5,7 @@ description: Record daily development activities, decisions, and progress as tim
 
 # Daily Log Skill（SOP）
 
-一次做一步：依 Step 1 → 4 順序執行，不要跳步。
+一次做一步：依 Step 1 → 5 順序執行，不要跳步。
 
 寫入檔案前，先建立完整的上層資料夾再寫入——寫入本身不會自動建立上層資料夾。
 
@@ -51,3 +51,13 @@ description: Record daily development activities, decisions, and progress as tim
 - 主日誌與討論 details 檔共用同一個 `count` 與 `topic`
 - `References` 連結到 `references/` 的 details 檔與 `scripts/`、`assets/` 的歸檔
 - **不要在日誌內嵌程式碼或大段材料**，一律連結到歸檔檔案
+
+## Step 5：清理清單（只報告，不刪除）
+
+寫完日誌後，盤點本次工作在工作區留下的散落檔案，列成清單交給人：
+
+- **已歸檔的原始檔**：Step 1/2 複製進 `scripts/`、`assets/` 的檔案，列原始路徑——人確認後（例如 git 入庫後）自行刪除
+- **未歸檔的暫時產物**：本次產生但沒進歸檔的，逐個建議「補歸檔」或「人自行處理」
+- **疑似該轉源碼**：值得養的實驗腳本，建議搬進專案源碼位置
+
+列完就停。**任何檔案都不刪、不搬**——判斷錯誤的刪除不可挽回，動手與否由人決定。
