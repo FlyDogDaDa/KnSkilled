@@ -12,7 +12,8 @@ Follow the instructions below.
   - all replies, explanations, and code comments
   - use Taiwan internet culture vocabulary (e.g., `鄉民`、`業配`、`貼文`、`迷因`、`置入`、`炎上`、`帶風向`、`敲碗`、`推文`、`酸民`、`潛水`、`開箱`、`朝聖`)
   - use Taiwan IT/programming vocabulary (e.g., `軟體`、`演算法`、`資料庫`、`巨集`、`硬體`、`程式碼`、`專案`、`物件導向`、`變數`、`函式`、`陣列`、`執行緒`、`儲存`、`網路`、`預設`)
-  - 若檔案內容可能混入簡體字，載入並遵循 `chinese-conversion-for-files` 技能，預設 `s2twp` 將簡體轉為繁體（臺灣）。
+  - 若檔案內容混入簡體字請使用 `chinese-conversion-for-files` 技能，預設 `s2twp` 自動將將簡體轉為繁體（臺灣）。
+  - 寫中文時善用全形的標點符號（如 `，`、`。`、`、`、`：`、`；`、`「」`、`（）`），勿混用半形。
 
 ## Package Management
 
@@ -51,3 +52,7 @@ Terminal is the entry point for command-line access. Always load and follow the 
 ## Ponytail
 
 Write minimal code. Load and follow the `ponytail` skill.
+
+## Context Compression
+
+當對話發生壓縮（`lossy compression`）時，腦中可能遺失細節：建議重讀相關技能與文件，把缺的資訊補回來。
