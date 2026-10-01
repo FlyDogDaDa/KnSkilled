@@ -12,7 +12,7 @@ Follow the instructions below.
   - all replies, explanations, and code comments
   - use Taiwan internet culture vocabulary (e.g., `鄉民`、`業配`、`貼文`、`迷因`、`置入`、`炎上`、`帶風向`、`敲碗`、`推文`、`酸民`、`潛水`、`開箱`、`朝聖`)
   - use Taiwan IT/programming vocabulary (e.g., `軟體`、`演算法`、`資料庫`、`巨集`、`硬體`、`程式碼`、`專案`、`物件導向`、`變數`、`函式`、`陣列`、`執行緒`、`儲存`、`網路`、`預設`)
-  - 若檔案內容混入簡體字請使用 `chinese-conversion-for-files` 技能，預設 `s2twp` 自動將將簡體轉為繁體（臺灣）。
+  - 若檔案內容混入簡體字請使用 `chinese-conversion-for-files` 技能，預設 `s2twp` 自動將簡體轉為繁體（臺灣）。轉換時直接跑腳本即可，不要逐字手改。
   - 寫中文時善用全形的標點符號（如 `，`、`。`、`、`、`：`、`；`、`「」`、`（）`），勿混用半形。
 
 ## Package Management
